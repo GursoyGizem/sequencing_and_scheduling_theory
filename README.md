@@ -199,4 +199,3 @@ Pareto Çözüm Sayısı: 200
 
 ---
 *Bu uygulama, Zhang ve ark. (2026) makalesinin implementasyonudur.
-```
