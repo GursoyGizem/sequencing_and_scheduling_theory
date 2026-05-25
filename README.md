@@ -119,7 +119,7 @@ python main.py
 
 ## Deney Sonuçları
 
-### Deney 1 — Küçük Örnek (5 İş, 2 Aşama, 2 Fabrika)
+### Deney 1 (5 İş, 2 Aşama, 2 Fabrika)
 
 Makale Tablo 4 & 5 ile birebir aynı problem verisi kullanılmıştır.
 
@@ -138,7 +138,7 @@ Makale Tablo 4 & 5 ile birebir aynı problem verisi kullanılmıştır.
 Çalışma süresi: 16.6 dk
 Pareto Çözüm Sayısı: 200
 
-### Deney 2 — Orta Ölçek (20 İş, 3 Aşama, 3 Fabrika)
+### Deney 2 (20 İş, 3 Aşama, 3 Fabrika)
 
 | Parametre | Değer |
 |-----------|-------|
