@@ -218,54 +218,58 @@ def hmopso_qls(inst, N=100, E_max=5000, params=None, verbose=True):
         G1, G2, G3, G4 = suru_ayristir(suru, gbest_set, params['boyutlar'])
         alt_surular = [G1, G2, G3, G4]
 
-        # Kuresel Arama (PSO) 
+        # Kuresel Arama (PSO)
+        # Her alt suru icin ilgili hedefe gore en iyi gbest sec
+        def gbest_sec(gs_no):
+            if not gbest_set:
+                return min(suru, key=lambda c: c.hedefler[min(gs_no,2)]
+                           if c.hedefler else float('inf'))
+            if gs_no == 0:   # G1: Cmax en kucuk
+                return min(gbest_set, key=lambda c: c.hedefler[0])
+            elif gs_no == 1: # G2: TEC en kucuk
+                return min(gbest_set, key=lambda c: c.hedefler[1])
+            elif gs_no == 2: # G3: TWC en kucuk
+                return min(gbest_set, key=lambda c: c.hedefler[2])
+            else:            # G4: PDDR-FF en kucuk
+                return min(gbest_set, key=lambda c: pddr_ff(c, gbest_set))
+
         yeni_suru = []
+        gs_no_listesi = []   # her parcacigin hangi alt suruye ait oldugu
         for gs_no, gs in enumerate(alt_surular):
-            gbest_ornek = (gbest_set[0] if gbest_set else
-                           min(suru, key=lambda c: c.hedefler[gs_no]
-                               if c.hedefler else float('inf')))
-            for i, parcacik in enumerate(gs):
-                pbest = pbest_set[suru.index(parcacik)
-                                  if parcacik in suru else 0]
+            gbest_ornek = gbest_sec(gs_no)
+            for parcacik in gs:
+                pbest_idx = suru.index(parcacik) if parcacik in suru else 0
+                pbest = pbest_set[pbest_idx]
                 guncellenmis = parcacik_guncelle(
                     parcacik, pbest, gbest_ornek, inst, params)
                 cozumle(guncellenmis, inst)
                 yeni_suru.append(guncellenmis)
+                gs_no_listesi.append(gs_no)
         E_cur += len(yeni_suru)
 
-        # Fabrikalar Arasi Yerel Arama
+        # Fabrikalar Arasi Yerel Arama — PSO ciktisi yeni_suru uzerinde calistir
         if_suru = []
-        for gs_no, gs in enumerate(alt_surular):
-            for parcacik in gs:
-                if parcacik in yeni_suru:
-                    idx = yeni_suru.index(parcacik)
-                    guncellenmis_if = fabrikalar_arasi_yerel_arama(
-                        yeni_suru[idx], inst, gs_no, gbest_set)
-                    if_suru.append(guncellenmis_if)
-                else:
-                    if_suru.append(parcacik.kopyala())
+        for parcacik, gs_no in zip(yeni_suru, gs_no_listesi):
+            guncellenmis_if = fabrikalar_arasi_yerel_arama(
+                parcacik, inst, gs_no, gbest_set)
+            if_suru.append(guncellenmis_if)
         E_cur += len(if_suru)
 
-        # Q-Ogrenme Tabanli Fabrika Ici Arama
+        # Q-Ogrenme Tabanli Fabrika Ici Arama — if_suru uzerinde calistir
         in_suru = []
-        for gs_no, gs in enumerate(alt_surular):
-            for parcacik in gs:
-                if parcacik in if_suru:
-                    idx = if_suru.index(parcacik)
-                    guncellenmis_in = q_ogrenme_fabrika_ici_arama(
-                        if_suru[idx], inst, gs_no, gbest_set,
-                        Q_Times=params['Q_Times'],
-                        L_Times=params['L_Times'],
-                        alpha=params['alpha'],
-                        gamma=params['gamma'],
-                        epsilon=params['epsilon']
-                    )
-                    in_suru.append(guncellenmis_in)
-                else:
-                    in_suru.append(parcacik.kopyala())
+        for parcacik, gs_no in zip(if_suru, gs_no_listesi):
+            guncellenmis_in = q_ogrenme_fabrika_ici_arama(
+                parcacik, inst, gs_no, gbest_set,
+                Q_Times=params['Q_Times'],
+                L_Times=params['L_Times'],
+                alpha=params['alpha'],
+                gamma=params['gamma'],
+                epsilon=params['epsilon']
+            )
+            in_suru.append(guncellenmis_in)
         E_cur += len(in_suru)
 
-        # Birlesim ve PDDR-FF secimi 
+        # Birlesim ve PDDR-FF secimi — orijinal suru + tam guncel in_suru
         R_t = suru + in_suru
         R_t = [c for c in R_t if c.hedefler is not None]
 
