@@ -5,9 +5,7 @@
 ---
 ## Problem Tanımı
 
-**DHHFSP-WME** (Distributed Heterogeneous Hybrid Flow-Shop Scheduling Problem with
-Worker–Machine–Environment Collaboration), gerçek üretim ortamlarının karmaşıklığını
-yansıtan üç boyutlu bir çizelgeleme problemidir.
+**DHHFSP-WME** (Distributed Heterogeneous Hybrid Flow-Shop Scheduling Problem with Worker–Machine–Environment Collaboration), gerçek üretim ortamlarının karmaşıklığını yansıtan üç boyutlu bir çizelgeleme problemidir.
 
 ### Temel Özellikler
 
