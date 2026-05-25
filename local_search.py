@@ -137,7 +137,7 @@ def kritik_fabrika_takas(cozum, inst, hedef_idx):
     j2 = random.choice(isler_min)
     yeni.FA[j1] = F_min
     yeni.FA[j2] = F_max
-    # Makine atamasini guncelle (fabrika degisince makine gecersiz olabilir)
+    # Makine atamasini guncelle 
     for k in range(inst.SN):
         yeni.MA[j1][k] = yeni.MA[j1][k] % inst.MN[F_min][k]
         yeni.MA[j2][k] = yeni.MA[j2][k] % inst.MN[F_max][k]

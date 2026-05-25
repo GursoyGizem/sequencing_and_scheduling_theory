@@ -120,10 +120,10 @@ def kucuk_ornek():
         [[7], [6, 8]],  # Fabrika 2: Asama1=1 makine, Asama2=2 makine
     ]
 
-    # Bekleme enerjisi
+    # Bekleme enerjisi = MECPU * 0.15 (makale varsayimi)
     inst.MECSU = [
-        [[1.0, 1.5], [0.9]], # Fabrika 1: Asama1=2 makine, Asama2=1 makine
-        [[1.0],      [0.9, 1.2]], # Fabrika 2: Asama1=1 makine, Asama2=2 makine
+        [[round(7*0.15,2), round(10*0.15,2)], [round(6*0.15,2)]],  # F1: [1.05, 1.5], [0.9]
+        [[round(7*0.15,2)], [round(6*0.15,2), round(8*0.15,2)]],   # F2: [1.05], [0.9, 1.2]
     ]
 
     # Isci sayisi = toplam makine sayisi
