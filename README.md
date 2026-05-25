@@ -198,4 +198,4 @@ Pareto Çözüm Sayısı: 200
 ```
 
 ---
-*Bu uygulama, Zhang ve ark. (2026) makalesinin implementasyonudur.
+*Bu uygulama, Zhang ve ark. (2026) makalesinin implementasyonudur. Bu implementasyon akademik eğitim ve araştırma amacıyla geliştirilmiştir. Orijinal araştırmacılarla veya makalenin yayımlandığı dergi ile doğrudan bir bağlantısı bulunmamaktadır.
