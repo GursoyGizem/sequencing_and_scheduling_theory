@@ -116,58 +116,62 @@ def cozumle(cozum, inst):
                 C[(j, k)] = baslama + at
                 mak_mevcut[f][k][m] = C[(j, k)]
 
-    # --- SAG KAYDIRMA STRATEJISI ---
-    # Her makinedeki isleri mumkun oldugunca saga kaydirarak TEC ve TWC'yi azalt.
-    # Kural: Cmax artmamali, hicbir isin sonraki asamasi gecikmemeli.
-    # Yon: son asamadan ilk asamaya (geriye dogru) isle — boylece her asama,
-    #      sonraki asamanin guncel baslama zamani kisitini kullanir.
+    # Sag Kaydirma Stratejisi:
+    # Islerin ardindan gelen bosluklari kapatmak icin, her asamadaki isleri saga kaydir.
+    # Boylece bekleme enerjisi azalir, Cmax kesinlikle artmaz.
 
-    # Once gecici Cmax hesapla (kaydirma siniri)
-    Cmax_gecici = max(C[(j, SN - 1)] for j in range(JN))
+    # Temel kural (makine penceresi buyumez):
+    #   - Son is KAYDIRILMAZ (son is kayarsa pencere genisler, TEC/TWC artar).
+    #   - Yalnizca "saga dogru bosluk" olan isler kaydırılır.
+    #   - Kaydirma miktarı: isin sagındaki komsuya yapisana kadar.
+    #   - Oncel kisit (C[(j,k-1)]) ve sonraki asama kisiti (S[(j,k+1)])
+    #     asilmaz; Cmax kesinlikle artmaz.
+    #
+    # Yon: son asamadan ilk asamaya (k = SN-1 -> 0).
+    #      Boylece k+1 asamasinda yapılan guncellemeler
+    #      k asamasinin kisitlarini guncel tutar.
 
     for f in range(FN):
         isler = fabrika_isler[f]
         if not isler:
             continue
 
-        for k in range(SN - 1, -1, -1):           # son asamadan geriye
+        for k in range(SN - 1, -1, -1):
             for m in range(inst.MN[f][k]):
-                # Bu makinedeki isler, mevcut baslama zamanina gore sirali
+                # Makineye atanan isler, mevcut baslama zamanina gore sirali
                 jobs_m = sorted(
                     [j for j in isler if MA[j][k] % inst.MN[f][k] == m],
                     key=lambda j: S[(j, k)]
                 )
-                if not jobs_m:
-                    continue
+                if len(jobs_m) < 2:
+                    continue   # tek is varsa bosluk olmaz
 
-                # Sagdan sola isle: son is -> ilk is
-                for idx in range(len(jobs_m) - 1, -1, -1):
-                    j = jobs_m[idx]
-                    at_j = AT[(j, k)]
+                # Sagdan sola isle; son is kaydirilmaz, oncesi sagdaki komsuya kadar kayar
+                for idx in range(len(jobs_m) - 2, -1, -1):
+                    j     = jobs_m[idx]
+                    j_sag = jobs_m[idx + 1]
+                    at_j  = AT[(j, k)]
 
-                    # Izin verilen en gec bitis:
-                    if k == SN - 1:
-                        # Son asama: Cmax_gecici'yi gecme
-                        ust_sinir = Cmax_gecici
-                    else:
-                        # Ara asama: sonraki asamanin (guncel) baslama zamanini gecme
-                        ust_sinir = S[(j, k + 1)]
+                    # Sagdaki komsu ile bosluk var mi?
+                    bosluk = S[(j_sag, k)] - C[(j, k)]
+                    if bosluk <= 1e-9:
+                        continue   # zaten bosluk yok
 
-                    # Ayni makinede sagdaki komsu is ile cakisma olmasin
-                    if idx < len(jobs_m) - 1:
-                        j_sag = jobs_m[idx + 1]
-                        ust_sinir = min(ust_sinir, S[(j_sag, k)])
+                    # En gec baslama: sagdaki is baslamadan hemen once bitis
+                    en_gec = S[(j_sag, k)] - at_j
 
-                    # En gec izin verilen baslama zamani
-                    en_gec = ust_sinir - at_j
+                    # Sonraki asama kisiti: j'nin k+1 asamasi gecikmemeli
+                    if k < SN - 1:
+                        en_gec = min(en_gec, S[(j, k + 1)] - at_j)
 
-                    # En erken izin verilen baslama zamani (oncel kisit)
+                    # Oncel kisit: k-1 asamasi bitmeden baslayamaz
                     en_erken = C[(j, k - 1)] if k > 0 else 0.0
 
-                    # Sadece saga kaydirma: en_gec >= en_erken ise kaydirma yap
-                    if en_gec >= en_erken + 1e-9 and en_gec > S[(j, k)] + 1e-9:
-                        S[(j, k)] = en_gec
-                        C[(j, k)] = en_gec + at_j
+                    # Gecerli ve sag-kaydirma mumkun mu?
+                    if en_gec > S[(j, k)] + 1e-9 and en_gec >= en_erken - 1e-9:
+                        yeni_bas = max(en_gec, en_erken)
+                        S[(j, k)] = yeni_bas
+                        C[(j, k)] = yeni_bas + at_j
 
     Cmax = max(C[(j, SN - 1)] for j in range(JN))
     TEC = 0.0

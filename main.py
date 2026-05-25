@@ -173,4 +173,4 @@ def parametrik_karsilastirma():
 if __name__ == '__main__':
     gbest1, gecmis1 = deney_kucuk()
     gbest2, gecmis2 = deney_orta()
-    gbest3, gecmis3 = deney_buyuk()
+    #gbest3, gecmis3 = deney_buyuk()
