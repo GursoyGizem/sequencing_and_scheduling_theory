@@ -81,9 +81,14 @@ def vns_operatoru_uygula(cozum, op_no, inst, fabrika_idx=None):
 
         if op_tipi == 0:  # Ekleme: j2'nin k.asamasini j1'e koy
             yeni.MA[j1][k] = m2
-        elif op_tipi == 1:  # Ters cevirme: isler arasi ters cevir
-            yeni.MA[j1][k], yeni.MA[j2][k] = m2, m1
-        else:  # Takas
+        elif op_tipi == 1:  # Ters cevirme: tum asamalari ters cevir
+            for kk in range(inst.SN):
+                f1 = yeni.FA[j1]
+                f2 = yeni.FA[j2]
+                tmp = yeni.MA[j1][kk] % inst.MN[f1][kk]
+                yeni.MA[j1][kk] = yeni.MA[j2][kk] % inst.MN[f2][kk]
+                yeni.MA[j2][kk] = tmp
+        else:  # Takas: sadece secili asamayi degistir
             yeni.MA[j1][k], yeni.MA[j2][k] = m2, m1
 
     else:  # WA vektoru

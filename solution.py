@@ -189,10 +189,13 @@ def cozumle(cozum, inst):
                     TEC += inst.MECPU[f][k][m] * AT[(j,k)]
 
                 # Bekleme enerjisi
-                ilk_bas = min(s for _, s, c in isler_m)
-                son_bit = max(c for _, s, c in isler_m)
-                toplam_islem = sum(AT[(j,k)] for j, _, _ in isler_m)
-                bekleme = max(0, (son_bit - ilk_bas) - toplam_islem)
+                isler_sirali = sorted(isler_m, key=lambda x: x[1])  # baslama zamanina gore sirala
+                bekleme = 0.0
+                for idx in range(len(isler_sirali) - 1):
+                    mevcut_bitis = isler_sirali[idx][2]
+                    sonraki_baslama = isler_sirali[idx + 1][1]
+                    bosluk = sonraki_baslama - mevcut_bitis
+                    bekleme += max(0.0, bosluk)
                 TEC += inst.MECSU[f][k][m] * bekleme
 
     TWC = 0.0

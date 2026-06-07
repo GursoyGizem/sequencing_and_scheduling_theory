@@ -26,21 +26,35 @@ def suru_ayristir(suru, gbest_set, boyutlar=(15, 15, 15, 55)):
         return [suru[:n1], suru[n1:n1+n2],
                 suru[n1+n2:n1+n2+n3], suru[n1+n2+n3:]]
 
+    atanan = set()
+
     # G1: Cmax'i en kucuk olanlar
     sirali_cmax = sorted(gec, key=lambda c: c.hedefler[0])
-    G1 = sirali_cmax[:n1]
+    G1 = []
+    for c in sirali_cmax:
+        if id(c) not in atanan and len(G1) < n1:
+            G1.append(c)
+            atanan.add(id(c))
 
     # G2: TEC'i en kucuk olanlar
     sirali_tec = sorted(gec, key=lambda c: c.hedefler[1])
-    G2 = sirali_tec[:n2]
+    G2 = []
+    for c in sirali_tec:
+        if id(c) not in atanan and len(G2) < n2:
+            G2.append(c)
+            atanan.add(id(c))
 
     # G3: TWC'yi en kucuk olanlar
     sirali_twc = sorted(gec, key=lambda c: c.hedefler[2])
-    G3 = sirali_twc[:n3]
+    G3 = []
+    for c in sirali_twc:
+        if id(c) not in atanan and len(G3) < n3:
+            G3.append(c)
+            atanan.add(id(c))
 
-    # G4: PDDR-FF degeri en kucuk olanlar (en guclu cozumler)
+    # G4: PDDR-FF degeri en kucuk olanlar — kalan parcaciklar
     arsiv = gbest_set if gbest_set else gec
-    pddr_degerler = [(c, pddr_ff(c, arsiv)) for c in gec]
+    pddr_degerler = [(c, pddr_ff(c, arsiv)) for c in gec if id(c) not in atanan]
     sirali_pddr = sorted(pddr_degerler, key=lambda x: x[1])
     G4 = [c for c, _ in sirali_pddr[:n4]]
 
@@ -238,8 +252,8 @@ def hmopso_qls(inst, N=100, E_max=5000, params=None, verbose=True):
         for gs_no, gs in enumerate(alt_surular):
             gbest_ornek = gbest_sec(gs_no)
             for parcacik in gs:
-                pbest_idx = suru.index(parcacik) if parcacik in suru else 0
-                pbest = pbest_set[pbest_idx]
+                pbest_idx = next((i for i, s in enumerate(suru) if s is parcacik), 0)
+                pbest = pbest_set[pbest_idx] if pbest_idx < len(pbest_set) else parcacik.kopyala()
                 guncellenmis = parcacik_guncelle(
                     parcacik, pbest, gbest_ornek, inst, params)
                 cozumle(guncellenmis, inst)
